@@ -7,3 +7,6 @@ __pycache__/
 outputs/
 downloads/
 
+venv/
+downloads/
+outputs/
