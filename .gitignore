@@ -1,12 +1,7 @@
 venv/
 __pycache__/
 *.pyc
-*.mp4
-*.mp3
-*.log
-outputs/
-downloads/
+downloads/*.mp4
+downloads/*.mp3
+outputs/*.mp4
 
-venv/
-downloads/
-outputs/
