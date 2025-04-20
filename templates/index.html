@@ -1,21 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>YouDub</title>
+    <title>YouDub – Translate & Dub YouTube</title>
 </head>
-<body>
-  <form action="/process" method="POST">
-    <input type="text" name="youtube_url" placeholder="Enter YouTube URL" required>
-    <select name="language">
-      <option value="en">English</option>
-      <option value="hi">Hindi</option>
-      <option value="te">Telugu</option>
-      <option value="ta">Tamil</option>
-      <option value="bn">Bengali</option>
-      <option value="fr">French</option>
-    </select>
-    <button type="submit">Download & Dub</button>
-  </form>
+<body style="font-family: sans-serif;">
+    <h2>YouDub 🎙️</h2>
+
+    <form method="post">
+        <input type="text" name="url" placeholder="Paste YouTube URL" style="width: 300px;" required>
+        <select name="language" required>
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="te">Telugu</option>
+            <option value="fr">French</option>
+            <option value="ta">Tamil</option>
+        </select>
+        <button type="submit">Download & Dub</button>
+    </form>
+
+    {% if success %}
+        <h3>Original Transcript:</h3>
+        <p>{{ transcript }}</p>
+
+        <h3>Translated Text:</h3>
+        <p>{{ translated }}</p>
+
+        <audio controls>
+            <source src="{{ url_for('static', filename='downloads/output.mp3') }}" type="audio/mp3">
+        </audio>
+        <br><br>
+        <a href="/download">⬇ Download Dubbed Audio</a>
+    {% elif error %}
+        <p style="color: red;">❌ Error: {{ error }}</p>
+    {% endif %}
 </body>
 </html>
 

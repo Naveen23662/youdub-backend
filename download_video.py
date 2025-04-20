@@ -1,9 +1,20 @@
-from pytube import YouTube
+import yt_dlp
 
-url = input("Enter YouTube URL: ")
-yt = YouTube(url)
-stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
-stream.download(output_path="downloads", filename="video.mp4")
+def download_audio(url):
+    output_path = "static/downloads/input.mp3"
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': output_path,
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'quiet': True
+    }
 
-print("✅ Video downloaded as downloads/video.mp4")
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+
+    return output_path
 

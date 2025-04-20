@@ -1,41 +1,37 @@
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_file
 import os
-from downloader import download_audio
+from download_video import download_audio
+from transcribe import transcribe_audio
+from translate import translate_text
+from merge import generate_dubbed_audio
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route("/", methods=["GET", "POST"])
 def index():
-    return render_template('index.html')
+    if request.method == "POST":
+        url = request.form["url"]
+        language = request.form["language"]
 
-@app.route('/process', methods=['POST'])
-def process():
-    youtube_url = request.form.get('youtube_url')
-    language = request.form.get('language')
+        try:
+            input_path = download_audio(url)  # Downloads and returns path to MP3
+            transcript = transcribe_audio(input_path)  # Transcribe to text
+            translated_text = translate_text(transcript, language)  # Translate
+            dubbed_path = generate_dubbed_audio(translated_text, language)  # Generate new mp3
 
-    if not youtube_url:
-        return "⚠️ Error: No YouTube URL provided.", 400
+            return render_template("index.html", success=True, transcript=transcript, translated=translated_text)
+        except Exception as e:
+            return render_template("index.html", error=str(e))
 
-    audio_path = download_audio(youtube_url)  # only one argument now
+    return render_template("index.html")
 
-    if not audio_path or not os.path.exists(audio_path):
-        return render_template('error.html', error="No audio file found.")
+@app.route("/download")
+def download():
+    dubbed_path = "static/downloads/output.mp3"
+    if os.path.exists(dubbed_path):
+        return send_file(dubbed_path, as_attachment=True)
+    return "Dubbed file not found.", 404
 
-    return render_template(
-        'success.html',
-        youtube_url=youtube_url,
-        audio_path=audio_path,
-        video_path="outputs/final_dubbed_video.mp4"
-    )
-
-@app.route('/downloads/<path:filename>')
-def download_file(filename):
-    return send_from_directory('downloads', filename)
-
-@app.route('/outputs/<path:filename>')
-def download_output_file(filename):
-    return send_from_directory('outputs', filename)
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
 
