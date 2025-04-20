@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouDub</title>
+</head>
+<body>
+    <h1>🎬 YouDub</h1>
+    <form method="POST" action="/process">
+        <label>YouTube URL:</label>
+        <input type="text" name="url" required><br><br>
+
+        <label>Select Language:</label>
+        <select name="language" required>
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="ta">Tamil</option>
+            <option value="te">Telugu</option>
+            <option value="bn">Bengali</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="es">Spanish</option>
+            <option value="ml">Malayalam</option>
+            <option value="mr">Marathi</option>
+        </select><br><br>
+
+        <button type="submit">Download & Dub</button>
+    </form>
+</body>
+</html>
+

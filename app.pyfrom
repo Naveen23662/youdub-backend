@@ -1,0 +1,28 @@
+from pytube import YouTube
+import os
+
+@app.route('/process', methods=['POST'])
+def process():
+    try:
+        youtube_url = request.form.get('youtube_url')
+        target_language = request.form.get('language')
+
+        if not youtube_url or not target_language:
+            return render_template('index.html', error="❗ Please enter a YouTube URL and select a language.")
+
+        yt = YouTube(youtube_url)
+        audio_stream = yt.streams.filter(only_audio=True).first()
+
+        # Create downloads folder if not exists
+        os.makedirs('static/downloads', exist_ok=True)
+
+        # Download audio
+        file_path = audio_stream.download(output_path="static/downloads", filename="original_audio.mp4")
+
+        return render_template('index.html',
+                               message=f"✅ Audio downloaded successfully: {yt.title}",
+                               audio_file="original_audio.mp4")
+
+    except Exception as e:
+        return render_template('index.html', error=f"❌ Error: {e}")
+

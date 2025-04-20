@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Success</title>
+</head>
+<body>
+  <h1>✅ Audio downloaded successfully for {{ youtube_url }}</h1>
+
+  <audio controls>
+    <source src="{{ url_for('download_file', filename='audio.mp3') }}" type="audio/mp3">
+  </audio>
+  <br>
+  <a href="{{ url_for('download_file', filename='audio.mp3') }}">🔉 Download MP3</a>
+
+  <br><br>
+
+  <video width="640" height="360" controls>
+    <source src="{{ url_for('download_output_file', filename='final_dubbed_video.mp4') }}" type="video/mp4">
+  </video>
+  <br>
+  <a href="{{ url_for('download_output_file', filename='final_dubbed_video.mp4') }}">🎥 Download Dubbed Video</a>
+</body>
+</html>
+

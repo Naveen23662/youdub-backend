@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouDub - Output</title>
+</head>
+<body>
+    <h1>✅ Audio downloaded successfully for {{ url }}</h1>
+
+    {% if audio_exists %}
+        <audio controls>
+            <source src="{{ url_for('static', filename='downloads/audio.mp3') }}" type="audio/mp3">
+        </audio>
+        <p><a href="{{ url_for('static', filename='downloads/audio.mp3') }}" download>🎧 Download MP3</a></p>
+    {% else %}
+        <p style="color: red;">⚠️ Error: No audio file found.</p>
+    {% endif %}
+
+    {% if video_exists %}
+        <video width="640" controls>
+            <source src="{{ url_for('static', filename='outputs/final_dubbed_video.mp4') }}" type="video/mp4">
+        </video>
+        <p><a href="{{ url_for('static', filename='outputs/final_dubbed_video.mp4') }}" download>🎥 Download Dubbed Video</a></p>
+    {% endif %}
+</body>
+</html>
+

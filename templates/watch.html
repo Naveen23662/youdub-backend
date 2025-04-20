@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YouDub Watch Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🎧 YouDub: Language Playback</h1>
+
+        <div class="video-info">
+            <p><strong>YouTube Video ID:</strong> {{ video_id }}</p>
+        </div>
+
+        <div class="audio-player">
+            <audio controls>
+                <source src="{{ url_for('static', filename='audio/' + audio_file) }}" type="audio/mp3">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+
+        <div class="language-options">
+            <label for="language">Language (Coming Soon):</label>
+            <select id="language" disabled>
+                <option selected>English</option>
+                <option>Telugu</option>
+                <option>Hindi</option>
+                <option>Tamil</option>
+            </select>
+        </div>
+
+        <a href="{{ url_for('index') }}">⬅ Back to Home</a>
+    </div>
+</body>
+</html>
+

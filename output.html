@@ -1,0 +1,22 @@
+<h1>{{ message }} {{ url }}</h1>
+
+{% if audio_path %}
+  <audio controls>
+    <source src="{{ audio_path }}" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+  <br>
+  <a href="{{ audio_path }}" download>🎧 Download MP3</a>
+{% else %}
+  <p style="color:red">⚠️ Error: No audio file found.</p>
+{% endif %}
+
+{% if video_path and video_path != '' %}
+  <video controls width="600">
+    <source src="{{ video_path }}" type="video/mp4">
+    Your browser does not support the video element.
+  </video>
+  <br>
+  <a href="{{ video_path }}" download>🎥 Download Dubbed Video</a>
+{% endif %}
+

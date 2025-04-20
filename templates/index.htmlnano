@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>YouDub - YouTube Dubbing Tool</title>
+</head>
+<body>
+  <h1>YouDub</h1>
+  <form action="/process" method="post">
+    <label>YouTube URL:</label><br>
+    <input type="text" name="youtube_url" required><br><br>
+
+    <label>Select Language:</label><br>
+    <select name="language" required>
+      <option value="">--Select--</option>
+      <option value="te">Telugu</option>
+      <option value="hi">Hindi</option>
+      <option value="en">English</option>
+    </select><br><br>
+
+    <button type="submit">Download & Dub</button>
+  </form>
+
+  {% if error %}
+    <p style="color: red;">{{ error }}</p>
+  {% endif %}
+
+  {% if audio_file %}
+    <h3>Preview Dubbed Audio:</h3>
+    <audio controls>
+      <source src="{{ url_for('static', filename=audio_file) }}" type="audio/mp3">
+      Your browser does not support the audio element.
+    </audio><br>
+    <a href="{{ url_for('static', filename=audio_file) }}" download>⬇️ Download Dubbed Audio</a><br><br>
+    <a href="/">🔄 Try Another</a>
+  {% endif %}
+</body>
+</html>
+
