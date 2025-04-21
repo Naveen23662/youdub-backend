@@ -1,42 +1,23 @@
-from flask import Flask, request, send_file
-from pytube import YouTube
-from translate import translate_text
-from dub import generate_dub
-import os
+from flask import Flask, request
+from dub import process_dubbing
 
 app = Flask(__name__)
 
-@app.route("/")
-def home():
-    return "YouDub is running!"
+@app.route('/dub')
+def dub_video():
+    youtube_url = request.args.get('url')
+    target_language = request.args.get('lang')
 
-@app.route("/translate")
-def translate():
-    text = request.args.get("text")
-    lang = request.args.get("lang")
-    translated = translate_text(text, lang)
-    return f"Translated: {translated}"
+    print(f"YouTube URL: {youtube_url} | Target Language: {target_language}")
 
-@app.route("/dub")
-def dub():
-    try:
-        url = request.args.get("url")
-        lang = request.args.get("lang")
+    # Run dummy dubbing logic
+    output_path = process_dubbing(youtube_url, target_language)
 
-        if not url or not lang:
-            return "Missing URL or target language", 400
-
-        # Download YouTube audio
-        yt = YouTube(url)
-        stream = yt.streams.filter(only_audio=True).first()
-        input_path = "static/downloads/input.mp3"
-        stream.download(filename=input_path)
-
-        # Generate dubbed audio (dummy function for now)
-        output_path = generate_dub(input_path, lang)
-
-        return send_file(output_path, as_attachment=True)
-
-    except Exception as e:
-        return f"Error occurred: {str(e)}", 500
+    return f'''
+    <h3>Dubbed Audio Created ✅</h3>
+    <p>URL: {youtube_url}</p>
+    <p>Language: {target_language}</p>
+    <audio controls src="/{output_path}"></audio><br>
+    <a href="/{output_path}" download>Download Dubbed Audio</a>
+    '''
 
