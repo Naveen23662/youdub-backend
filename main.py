@@ -12,9 +12,7 @@ def dub_video():
     youtube_url = request.args.get('url')
     target_language = request.args.get('lang')
 
-    print(f"YouTube URL: {youtube_url} | Target Language: {target_language}")
-
-    # Call dummy dubbing function
+    # Run dummy dubbing and get audio path
     output_path = process_dubbing(youtube_url, target_language)
 
     return f'''
