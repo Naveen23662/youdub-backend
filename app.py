@@ -42,3 +42,19 @@ def dub_youtube():
     translated = translator.translate(text, dest=lang)
     return f"Translated Text: {translated.text}"
 
+from flask import Flask, request
+from googletrans import Translator
+
+app = Flask(__name__)
+
+@app.route('/dub')
+def dub():
+    youtube_url = request.args.get('url')
+    lang = request.args.get('lang')
+
+    if not youtube_url or not lang:
+        return "Missing YouTube URL or language code", 400
+
+    # For now, just return a test message
+    return f"YouTube URL: {youtube_url} | Target Language: {lang}"
+
