@@ -1,20 +1,18 @@
 from flask import Flask, request, send_file
-from downloader import download_audio
-from dubber import dummy_dub
+import os
 
 app = Flask(__name__)
 
-@app.route('/dub')
-def dub_video():
-    url = request.args.get('url')
-    lang = request.args.get('lang')
+@app.route("/dub")
+def dub_audio():
+    url = request.args.get("url")
+    lang = request.args.get("lang")
 
-    # Step 1: Download YouTube audio
-    audio_path = download_audio(url)
+    # Just simulating output path (adjust this as per your actual dubbing logic)
+    dubbed_path = f"static/downloads/output_{lang}.mp3"
 
-    # Step 2: Dummy dubbing (can replace with Whisper later)
-    dubbed_path = dummy_dub(audio_path, lang)
-
-    # Step 3: Send file to user
-    return send_file(dubbed_path, as_attachment=True)
+    if os.path.exists(dubbed_path):
+        return send_file(dubbed_path, as_attachment=True)
+    else:
+        return f"Dubbed audio not found at {dubbed_path}", 404
 
