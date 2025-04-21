@@ -9,17 +9,15 @@ def home():
 
 @app.route('/dub')
 def dub_video():
-    youtube_url = request.args.get('url')
-    target_language = request.args.get('lang')
+    url = request.args.get('url')
+    lang = request.args.get('lang')
 
-    # Run dummy dubbing and get audio path
-    output_path = process_dubbing(youtube_url, target_language)
+    # Step 1: Download YouTube audio
+    audio_path = download_audio(url)
 
-    return f'''
-    <h3>Dubbed Audio Created ✅</h3>
-    <p>URL: {youtube_url}</p>
-    <p>Language: {target_language}</p>
-    <audio controls src="/{output_path}"></audio><br>
-    <a href="/{output_path}" download>Download Dubbed Audio</a>
-    '''
+    # Step 2: Translate + dub (dummy now, real logic later)
+    dubbed_path = dummy_dub(audio_path, lang)
+
+    # Step 3: Serve the dubbed file
+    return send_file(dubbed_path, as_attachment=True)
 
