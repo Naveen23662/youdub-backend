@@ -3,6 +3,10 @@ from dub import process_dubbing
 
 app = Flask(__name__)
 
+@app.route('/')
+def home():
+    return "Welcome to YouDub!"
+
 @app.route('/dub')
 def dub_video():
     youtube_url = request.args.get('url')
@@ -10,7 +14,7 @@ def dub_video():
 
     print(f"YouTube URL: {youtube_url} | Target Language: {target_language}")
 
-    # Run dummy dubbing logic
+    # Call dummy dubbing function
     output_path = process_dubbing(youtube_url, target_language)
 
     return f'''
