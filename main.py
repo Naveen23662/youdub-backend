@@ -10,8 +10,8 @@ def dub():
     return render_template_string("""
     <h2>YouTube URL: {{ youtube_url }} | Target Language: {{ lang }}</h2>
     <audio controls>
-      <source src="/static/downloads/dubbed.mp3" type="audio/mpeg">
-      Your browser does not support the audio element.
+        <source src="/static/downloads/dubbed.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
     </audio>
     <br>
     <a href="/static/downloads/dubbed.mp3" download>Download Dubbed Audio</a>
