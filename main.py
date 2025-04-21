@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return "YouDub is live!"
+    return "YouDub is running!"
 
 @app.route("/translate")
 def translate():
@@ -18,25 +18,22 @@ def translate():
     return f"Translated: {translated}"
 
 @app.route("/dub")
-def dub_video():
-    youtube_url = request.args.get("url")
-    lang = request.args.get("lang")
-
-    if not youtube_url or not lang:
-        return "Missing parameters", 400
-
+def dub():
     try:
-        print("Downloading audio...")
-        yt = YouTube(youtube_url)
+        url = request.args.get("url")
+        lang = request.args.get("lang")
+
+        if not url or not lang:
+            return "Missing URL or language", 400
+
+        yt = YouTube(url)
         stream = yt.streams.filter(only_audio=True).first()
-        download_path = "static/downloads/input.mp3"
-        stream.download(filename=download_path)
+        input_path = "static/downloads/input.mp3"
+        stream.download(filename=input_path)
 
-        print("Generating dub...")
-        dubbed_path = generate_dub(download_path, lang)
+        output_path = generate_dub(input_path, lang)
 
-        print("Sending file back...")
-        return send_file(dubbed_path, as_attachment=True)
+        return send_file(output_path, as_attachment=True)
 
     except Exception as e:
         return f"Error: {str(e)}", 500
