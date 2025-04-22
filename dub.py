@@ -1,7 +1,10 @@
-import shutil
+# dub.py
+from pytube import YouTube
 
-def generate_dub(input_path, lang):
-    output_path = "static/downloads/output.mp3"
-    shutil.copy(input_path, output_path)
-    return output_path
+def download_audio(youtube_url):
+    yt = YouTube(youtube_url)
+    audio_stream = yt.streams.filter(only_audio=True).first()
+    output_path = "static/downloads"
+    filename = "dubbed.mp3"
+    audio_stream.download(output_path=output_path, filename=filename)
 

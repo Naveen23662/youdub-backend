@@ -1,33 +1,33 @@
+# main.py
 from flask import Flask, request, render_template_string
+from dub import download_audio
 
 app = Flask(__name__)
 
-@app.route("/")
-def home():
-    return "YouDub is Live"
-
 @app.route("/dub")
 def dub_video():
-    youtube_url = request.args.get("url")
-    target_language = request.args.get("lang")
+    url = request.args.get("url")
+    lang = request.args.get("lang", "en")
 
-    html = """
-    <!DOCTYPE html>
-    <html>
-    <head><title>YouDub</title></head>
-    <body>
-        <h2>YouTube URL: {{ youtube_url }} | Target Language: {{ target_language }}</h2>
-        <audio controls>
-            <source src="/static/downloads/dubbed.mp3" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
-        <br><br>
-        <a href="/static/downloads/dubbed.mp3" download>Download Dubbed Audio</a>
-    </body>
-    </html>
-    """
-    return render_template_string(html, youtube_url=youtube_url, target_language=target_language)
+    if not url:
+        return "Missing YouTube URL", 400
+
+    try:
+        download_audio(url)
+        audio_path = "/static/downloads/dubbed.mp3"
+        return render_template_string(f"""
+            <h2>YouDub - Dubbed Audio</h2>
+            <p><b>YouTube URL:</b> {url}</p>
+            <p><b>Target Language:</b> {lang}</p>
+            <audio controls>
+                <source src="{audio_path}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio><br>
+            <a href="{audio_path}" download>Download Dubbed Audio</a>
+        """)
+    except Exception as e:
+        return f"❌ Error occurred: {str(e)}", 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run()
 
