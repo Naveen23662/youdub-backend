@@ -31,3 +31,12 @@ def dub_video():
 if __name__ == "__main__":
     app.run()
 
+from translate import translate_text
+
+@app.route("/translate")
+def translate_route():
+    text = request.args.get("text", "Hello, how are you?")
+    lang = request.args.get("lang", "te")
+    translated = translate_text(text, lang)
+    return f"Translated to {lang}: {translated}"
+
