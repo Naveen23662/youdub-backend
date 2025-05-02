@@ -1,0 +1,23 @@
+from transcribe import download_audio, transcribe_audio
+from translate import translate_text
+from tts import text_to_speech
+
+url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+target_language = "te"  # Telugu → use "hi" for Hindi, etc.
+
+# Step 1: Download and transcribe
+print("Downloading and transcribing...")
+mp3_path = download_audio(url)
+text = transcribe_audio(mp3_path)
+
+# Step 2: Translate
+print("\nTranslating...")
+translated_text = translate_text(text, target_language)
+
+# Step 3: Text to speech
+print("\nGenerating speech...")
+audio_output = text_to_speech(translated_text, lang_code=target_language)
+
+# Result
+print("\n✅ Done! Dubbed audio saved at:", audio_output)
+

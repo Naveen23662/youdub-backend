@@ -1,7 +1,13 @@
 import whisper
 
-def transcribe_audio(file_path):
-    model = whisper.load_model("base")
-    result = model.transcribe(file_path)
-    return result["text"]
+model = whisper.load_model("base")
+
+def transcribe_audio(audio_path):
+    try:
+        print("Transcribing...")
+        result = model.transcribe(audio_path)
+        return result["text"]
+    except Exception as e:
+        print("❌ Transcription failed:", str(e))
+        return None
 

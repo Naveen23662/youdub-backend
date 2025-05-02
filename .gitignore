@@ -1,8 +1,7 @@
-venv/
 __pycache__/
 *.pyc
-downloads/*.mp4
-downloads/*.mp3
-outputs/*.mp4
+*.pyo
+*.pyd
+.env
+venv*/
 
-static/downloads/*.mp3

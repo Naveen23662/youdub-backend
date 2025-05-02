@@ -1,26 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>YouDub - Output</title>
+  <title>YouDub Output</title>
 </head>
 <body>
-    <h1>✅ Audio downloaded successfully for {{ url }}</h1>
+  <h2>Translated & Dubbed Audio</h2>
 
-    {% if audio_exists %}
-        <audio controls>
-            <source src="{{ url_for('static', filename='downloads/audio.mp3') }}" type="audio/mp3">
-        </audio>
-        <p><a href="{{ url_for('static', filename='downloads/audio.mp3') }}" download>🎧 Download MP3</a></p>
-    {% else %}
-        <p style="color: red;">⚠️ Error: No audio file found.</p>
-    {% endif %}
+  <p><strong>Translated Text:</strong></p>
+  <p>{{ translated_text }}</p>
 
-    {% if video_exists %}
-        <video width="640" controls>
-            <source src="{{ url_for('static', filename='outputs/final_dubbed_video.mp4') }}" type="video/mp4">
-        </video>
-        <p><a href="{{ url_for('static', filename='outputs/final_dubbed_video.mp4') }}" download>🎥 Download Dubbed Video</a></p>
-    {% endif %}
+  <audio controls>
+    <source src="{{ url_for('static', filename='output.mp3') }}" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <br><br>
+  <a href="/">Back to Home</a>
 </body>
 </html>
 

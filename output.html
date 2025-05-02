@@ -20,3 +20,10 @@
   <a href="{{ video_path }}" download>🎥 Download Dubbed Video</a>
 {% endif %}
 
+{% if error %}
+  <p style="color:red;">⚠️ Error: {{ error }}</p>
+{% elif audio_file %}
+  <p style="color:green;">✅ Audio downloaded successfully</p>
+  <a href="{{ url_for('download_file', filename=audio_file) }}" download>Download Audio</a>
+{% endif %}
+
