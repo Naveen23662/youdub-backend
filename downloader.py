@@ -1,27 +1,26 @@
 import yt_dlp
-import os
+import numpy as np
+import tempfile
 
 def download_audio_from_youtube(url):
     try:
-        output_path = "static/input_audio.mp3"
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'outtmpl': output_path,
-            'quiet': True,
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-        }
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temp_audio:
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'outtmpl': temp_audio.name,
+                'quiet': True,
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+            }
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            print("✅ Downloaded:", info['title'])
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
 
-        return output_path
-
+            return temp_audio.name
     except Exception as e:
-        print("❌ Download failed:", str(e))
+        print(f"❌ Download failed: {e}")
         return None
 

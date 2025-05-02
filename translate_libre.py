@@ -1,52 +1,35 @@
 import requests
 
-# Supported language codes (ISO 639-1)
-SUPPORTED_LANGUAGES = [
-    "en",  # English
-    "hi",  # Hindi
-    "te",  # Telugu
-    "ta",  # Tamil
-    "kn",  # Kannada
-    "gu",  # Gujarati
-    "ml",  # Malayalam
-    "mr",  # Marathi
-    "bn",  # Bengali
-    "pa",  # Punjabi
-]
-
-# Display name for dropdown in index.html
+# Add supported languages here
 LANG_CODE_MAP = {
     "English": "en",
     "Hindi": "hi",
     "Telugu": "te",
     "Tamil": "ta",
     "Kannada": "kn",
-    "Gujarati": "gu",
     "Malayalam": "ml",
-    "Marathi": "mr",
     "Bengali": "bn",
-    "Punjabi": "pa",
+    "Gujarati": "gu",
+    "Marathi": "mr",
+    "Punjabi": "pa"
 }
 
-def translate_text_libre(text, target_lang):
-    if target_lang not in SUPPORTED_LANGUAGES:
+def translate_text_libre(original_text, target_language):
+    if target_language not in LANG_CODE_MAP:
         raise ValueError("Unsupported target language")
 
-    print("Translating...")
+    target_code = LANG_CODE_MAP[target_language]
+    url = "https://libretranslate.de/translate"
+    payload = {
+        "q": original_text,
+        "source": "auto",
+        "target": target_code,
+        "format": "text"
+    }
 
-    response = requests.post(
-        "https://libretranslate.com/translate",
-        headers={"Content-Type": "application/json"},
-        json={
-            "q": text,
-            "source": "en",
-            "target": target_lang,
-            "format": "text"
-        }
-    )
-
-    if response.status_code == 200:
+    try:
+        response = requests.post(url, json=payload)
         return response.json()["translatedText"]
-    else:
+    except:
         raise RuntimeError("LibreTranslate failed")
 
