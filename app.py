@@ -1,67 +1,68 @@
-from flask import Flask, request, render_template, send_file
+from flask import Flask, render_template, request
 from downloader import download_audio_from_youtube
-from translate_libre import translate_text_libre, LANG_CODE_MAP
+from translate_libre import LANG_CODE_MAP, translate_text_libre
 from tts_edge import synthesize_speech
-import tempfile
-import whisper
-import asyncio
+from faster_whisper import WhisperModel
 import os
 
 app = Flask(__name__)
 
-# Whisper model (tiny or base for Render; medium or large locally)
-model = whisper.load_model("base")
+# --- Step 2 Transcription Function ---
+def transcribe_audio(audio_path):
+    try:
+        # Load faster-whisper model with low memory footprint
+        model = WhisperModel("base", compute_type="int8")
 
-@app.route("/")
+        # Transcribe the audio
+        segments, info = model.transcribe(audio_path)
+
+        # Combine all the segments
+        result_text = " ".join(segment.text for segment in segments)
+        return result_text
+
+    except Exception as e:
+        return f"Error during transcription: {str(e)}"
+
+# --- Main Route ---
+@app.route('/')
 def index():
-    return render_template("index.html")
+    return render_template('index.html')
 
-@app.route("/dub", methods=["POST"])
+# --- Dubbing Route ---
+@app.route('/dub', methods=['POST'])
 def dub():
-    url = request.form.get("url")
-    target_language = request.form.get("language")
-
-    if not url or not target_language:
-        return "Error: Please provide both URL and target language."
-
-    print("Downloading audio...")
-    audio_path = download_audio_from_youtube(url)
-    if audio_path is None:
-        return "Error: Could not download audio from YouTube."
-
-    print("Transcribing...")
     try:
-        result = model.transcribe(audio_path)
-        original_text = result["text"]
+        url = request.form['url']
+        target_lang = request.form['language']
+        print("Downloading audio...")
+
+        audio_path = download_audio_from_youtube(url)
+
+        print("Transcribing...")
+        text = transcribe_audio(audio_path)
+
+        print("Translating...")
+        translated_text = translate_text_libre(text, target_lang)
+
+        print("Synthesizing speech...")
+        output_path = synthesize_speech(translated_text, target_lang)
+
+        return f"""
+            <h2>Translated and Dubbed!</h2>
+            <p><b>Original Text:</b> {text}</p>
+            <p><b>Translated:</b> {translated_text}</p>
+            <audio controls src="/{output_path}" autoplay></audio>
+            <br><a href="/">Go back</a>
+        """
+
     except Exception as e:
-        return f"Error during transcription: {e}"
+        return f"<p><b>Error:</b> {str(e)}</p>"
 
-    print("Translating...")
-    try:
-        translated_text = translate_text_libre(original_text, target_language)
-    except Exception as e:
-        return f"Error during translation: {e}"
+# --- Static file serving ---
+@app.route('/output/<path:filename>')
+def serve_audio(filename):
+    return app.send_static_file(os.path.join('output', filename))
 
-    print("Synthesizing speech...")
-    try:
-        output_path = "static/output.mp3"
-        lang_code = LANG_CODE_MAP.get(target_language, "en")
-        asyncio.run(synthesize_speech(translated_text, lang_code, output_path))
-    except Exception as e:
-        return f"Error during voice synthesis: {e}"
-
-    return f"""
-    <h2>Translation and Dubbing Complete</h2>
-    <p><strong>Original:</strong> {original_text}</p>
-    <p><strong>Translated:</strong> {translated_text}</p>
-    <audio controls>
-      <source src="/static/output.mp3" type="audio/mpeg">
-      Your browser does not support the audio tag.
-    </audio>
-    <br><br>
-    <a href="/static/output.mp3" download>Download Dubbed Audio</a>
-    """
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
 
