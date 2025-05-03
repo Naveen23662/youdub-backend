@@ -4,5 +4,5 @@ openai
 faster-whisper
 edge-tts
 gunicorn
-whisper
+openai-whisper
 
