@@ -1,11 +1,11 @@
 from faster_whisper import WhisperModel
 
-def transcribe_audio(file_path):
-    model = WhisperModel("base", compute_type="int8")
-    segments, _ = model.transcribe(file_path)
+def transcribe_audio(audio_path):
+    model = WhisperModel("base", compute_type="int8")  # use int8 to save memory
+    segments, info = model.transcribe(audio_path)
 
-    text = ""
+    full_text = ""
     for segment in segments:
-        text += segment.text
-    return text.strip()
+        full_text += segment.text
+    return full_text.strip()
 
