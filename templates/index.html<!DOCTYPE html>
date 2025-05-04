@@ -1,0 +1,24 @@
+<html>
+<head>
+  <title>YouDub</title>
+</head>
+<body>
+  <h1><b>YouDub Dubbing Page is Working!</b></h1>
+  <h2>YouDub</h2>
+
+  <form method="POST">
+    <label>YouTube Video URL:</label><br>
+    <input type="text" name="youtube_url" placeholder="https://www.youtube.com/watch?v=xyz"><br><br>
+
+    <label>Select Language:</label><br>
+    <select name="language">
+      <option value="Telugu">Telugu</option>
+      <option value="Hindi">Hindi</option>
+      <option value="Tamil">Tamil</option>
+    </select><br><br>
+
+    <button type="submit">Download & Dub</button>
+  </form>
+</body>
+</html>
+

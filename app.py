@@ -1,68 +1,104 @@
-from flask import Flask, render_template, request
-from downloader import download_audio_from_youtube
-from translate_libre import LANG_CODE_MAP, translate_text_libre
-from tts_edge import synthesize_speech
-from faster_whisper import WhisperModel
+from flask import Flask, render_template, request, send_file
 import os
+import yt_dlp
+import whisper
+import asyncio
+import edge_tts
+from deep_translator import GoogleTranslator
 
 app = Flask(__name__)
 
-# --- Step 2 Transcription Function ---
-def transcribe_audio(audio_path):
-    try:
-        # Load faster-whisper model with low memory footprint
-        model = WhisperModel("base", compute_type="int8")
+DOWNLOAD_FOLDER = "downloads"
+os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
-        # Transcribe the audio
-        segments, info = model.transcribe(audio_path)
+# Function to generate dubbed audio using Edge TTS
+async def generate_edge_tts(text, lang_code, gender, output_file):
+    female_voices = {
+        "en": "en-US-JennyNeural",
+        "hi": "hi-IN-SwaraNeural",
+        "te": "te-IN-ShrutiNeural",
+        "ta": "ta-IN-PallaviNeural",
+        "kn": "kn-IN-SapnaNeural",
+        "ml": "ml-IN-SobhanaNeural",
+        "mr": "mr-IN-KusumNeural",
+        "gu": "gu-IN-DhwaniNeural",
+        "bn": "bn-IN-TanishaaNeural",
+        "pa": "pa-IN-PallaviNeural",
+        "ur": "ur-PK-UzmaNeural",
+        "fr": "fr-FR-DeniseNeural",
+        "es": "es-ES-ElviraNeural"
+    }
 
-        # Combine all the segments
-        result_text = " ".join(segment.text for segment in segments)
-        return result_text
+    male_voices = {
+        "en": "en-US-GuyNeural",
+        "hi": "hi-IN-MadhurNeural",
+        "te": "te-IN-MohanNeural",
+        "ta": "ta-IN-ValluvarNeural",
+        "kn": "kn-IN-GaganNeural",
+        "ml": "ml-IN-MidhunNeural",
+        "mr": "mr-IN-AaravNeural",
+        "gu": "gu-IN-NiranjanNeural",
+        "bn": "bn-IN-TanishNeural",
+        "pa": "pa-IN-JagjitNeural",
+        "ur": "ur-PK-AsadNeural",
+        "fr": "fr-FR-HenriNeural",
+        "es": "es-ES-AlvaroNeural"
+    }
 
-    except Exception as e:
-        return f"Error during transcription: {str(e)}"
+    if gender == "female":
+        voice = female_voices.get(lang_code, "en-US-JennyNeural")
+    else:
+        voice = male_voices.get(lang_code, "en-US-GuyNeural")
 
-# --- Main Route ---
-@app.route('/')
+    communicate = edge_tts.Communicate(text=text, voice=voice)
+    await communicate.save(output_file)
+
+@app.route("/", methods=["GET", "POST"])
 def index():
-    return render_template('index.html')
+    if request.method == "POST":
+        youtube_url = request.form.get("youtube_url")
+        target_language = request.form.get("language")
+        voice_gender = request.form.get("gender")
 
-# --- Dubbing Route ---
-@app.route('/dub', methods=['POST'])
-def dub():
-    try:
-        url = request.form['url']
-        target_lang = request.form['language']
-        print("Downloading audio...")
+        if not youtube_url or not target_language:
+            return "Missing YouTube URL or language", 400
 
-        audio_path = download_audio_from_youtube(url)
+        try:
+            # Step 1: Download YouTube audio
+            output_path = os.path.join(DOWNLOAD_FOLDER, "original_audio.%(ext)s")
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'outtmpl': output_path,
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+                'quiet': True,
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([youtube_url])
 
-        print("Transcribing...")
-        text = transcribe_audio(audio_path)
+            # Step 2: Transcribe using Whisper
+            model = whisper.load_model("base")
+            downloaded_mp3 = os.path.join(DOWNLOAD_FOLDER, "original_audio.mp3")
+            result = model.transcribe(downloaded_mp3, fp16=False)
+            english_text = result["text"]
 
-        print("Translating...")
-        translated_text = translate_text_libre(text, target_lang)
+            # Step 3: Translate text
+            translated_text = GoogleTranslator(source='en', target=target_language).translate(english_text)
 
-        print("Synthesizing speech...")
-        output_path = synthesize_speech(translated_text, target_lang)
+            # Step 4: Dub using Edge TTS
+            dubbed_path = os.path.join(DOWNLOAD_FOLDER, "dubbed_audio.mp3")
+            asyncio.run(generate_edge_tts(translated_text, target_language, voice_gender, dubbed_path))
 
-        return f"""
-            <h2>Translated and Dubbed!</h2>
-            <p><b>Original Text:</b> {text}</p>
-            <p><b>Translated:</b> {translated_text}</p>
-            <audio controls src="/{output_path}" autoplay></audio>
-            <br><a href="/">Go back</a>
-        """
+            return send_file(dubbed_path, as_attachment=True)
 
-    except Exception as e:
-        return f"<p><b>Error:</b> {str(e)}</p>"
+        except Exception as e:
+            return f"Error processing video: {e}", 500
 
-# --- Static file serving ---
-@app.route('/output/<path:filename>')
-def serve_audio(filename):
-    return app.send_static_file(os.path.join('output', filename))
+    return render_template("index.html")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
 
