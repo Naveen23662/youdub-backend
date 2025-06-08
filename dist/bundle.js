@@ -1084,7 +1084,7 @@
             }
             return dispatcher.useContext(Context);
           }
-          function useState4(initialState) {
+          function useState3(initialState) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useState(initialState);
           }
@@ -1887,7 +1887,7 @@
           exports.useMemo = useMemo3;
           exports.useReducer = useReducer;
           exports.useRef = useRef3;
-          exports.useState = useState4;
+          exports.useState = useState3;
           exports.useSyncExternalStore = useSyncExternalStore;
           exports.useTransition = useTransition;
           exports.version = ReactVersion;
@@ -2383,9 +2383,9 @@
           if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
             __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
           }
-          var React7 = require_react();
+          var React5 = require_react();
           var Scheduler = require_scheduler();
-          var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React5.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           var suppressWarning = false;
           function setSuppressWarning(newSuppressWarning) {
             {
@@ -3990,7 +3990,7 @@
             {
               if (props.value == null) {
                 if (typeof props.children === "object" && props.children !== null) {
-                  React7.Children.forEach(props.children, function(child) {
+                  React5.Children.forEach(props.children, function(child) {
                     if (child == null) {
                       return;
                     }
@@ -23552,16 +23552,22 @@
     }
   });
 
+  // src/App.jsx
+  var require_App = __commonJS({
+    "src/App.jsx"() {
+    }
+  });
+
   // src/main.jsx
-  var import_react4 = __toESM(require_react());
+  var import_react = __toESM(require_react());
   var import_client = __toESM(require_client());
 
   // node_modules/react-router-dom/dist/index.js
-  var React2 = __toESM(require_react());
+  var React3 = __toESM(require_react());
   var ReactDOM = __toESM(require_react_dom());
 
   // node_modules/react-router/dist/index.js
-  var React = __toESM(require_react());
+  var React2 = __toESM(require_react());
 
   // node_modules/@remix-run/router/dist/router.js
   function _extends() {
@@ -23816,27 +23822,6 @@
     ResultType2["redirect"] = "redirect";
     ResultType2["error"] = "error";
   })(ResultType || (ResultType = {}));
-  function matchRoutes(routes, locationArg, basename) {
-    if (basename === void 0) {
-      basename = "/";
-    }
-    return matchRoutesImpl(routes, locationArg, basename, false);
-  }
-  function matchRoutesImpl(routes, locationArg, basename, allowPartial) {
-    let location = typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
-    let pathname = stripBasename(location.pathname || "/", basename);
-    if (pathname == null) {
-      return null;
-    }
-    let branches = flattenRoutes(routes);
-    rankRouteBranches(branches);
-    let matches = null;
-    for (let i = 0; matches == null && i < branches.length; ++i) {
-      let decoded = decodePath(pathname);
-      matches = matchRouteBranch(branches[i], decoded, allowPartial);
-    }
-    return matches;
-  }
   function convertRouteMatchToUiMatch(match, loaderData) {
     let {
       route,
@@ -23850,156 +23835,6 @@
       data: loaderData[route.id],
       handle: route.handle
     };
-  }
-  function flattenRoutes(routes, branches, parentsMeta, parentPath) {
-    if (branches === void 0) {
-      branches = [];
-    }
-    if (parentsMeta === void 0) {
-      parentsMeta = [];
-    }
-    if (parentPath === void 0) {
-      parentPath = "";
-    }
-    let flattenRoute = (route, index, relativePath) => {
-      let meta = {
-        relativePath: relativePath === void 0 ? route.path || "" : relativePath,
-        caseSensitive: route.caseSensitive === true,
-        childrenIndex: index,
-        route
-      };
-      if (meta.relativePath.startsWith("/")) {
-        invariant(meta.relativePath.startsWith(parentPath), 'Absolute route path "' + meta.relativePath + '" nested under path ' + ('"' + parentPath + '" is not valid. An absolute child route path ') + "must start with the combined path of all its parent routes.");
-        meta.relativePath = meta.relativePath.slice(parentPath.length);
-      }
-      let path = joinPaths([parentPath, meta.relativePath]);
-      let routesMeta = parentsMeta.concat(meta);
-      if (route.children && route.children.length > 0) {
-        invariant(
-          // Our types know better, but runtime JS may not!
-          // @ts-expect-error
-          route.index !== true,
-          "Index routes must not have child routes. Please remove " + ('all child routes from route path "' + path + '".')
-        );
-        flattenRoutes(route.children, branches, routesMeta, path);
-      }
-      if (route.path == null && !route.index) {
-        return;
-      }
-      branches.push({
-        path,
-        score: computeScore(path, route.index),
-        routesMeta
-      });
-    };
-    routes.forEach((route, index) => {
-      var _route$path;
-      if (route.path === "" || !((_route$path = route.path) != null && _route$path.includes("?"))) {
-        flattenRoute(route, index);
-      } else {
-        for (let exploded of explodeOptionalSegments(route.path)) {
-          flattenRoute(route, index, exploded);
-        }
-      }
-    });
-    return branches;
-  }
-  function explodeOptionalSegments(path) {
-    let segments = path.split("/");
-    if (segments.length === 0)
-      return [];
-    let [first, ...rest] = segments;
-    let isOptional = first.endsWith("?");
-    let required = first.replace(/\?$/, "");
-    if (rest.length === 0) {
-      return isOptional ? [required, ""] : [required];
-    }
-    let restExploded = explodeOptionalSegments(rest.join("/"));
-    let result = [];
-    result.push(...restExploded.map((subpath) => subpath === "" ? required : [required, subpath].join("/")));
-    if (isOptional) {
-      result.push(...restExploded);
-    }
-    return result.map((exploded) => path.startsWith("/") && exploded === "" ? "/" : exploded);
-  }
-  function rankRouteBranches(branches) {
-    branches.sort((a, b) => a.score !== b.score ? b.score - a.score : compareIndexes(a.routesMeta.map((meta) => meta.childrenIndex), b.routesMeta.map((meta) => meta.childrenIndex)));
-  }
-  var paramRe = /^:[\w-]+$/;
-  var dynamicSegmentValue = 3;
-  var indexRouteValue = 2;
-  var emptySegmentValue = 1;
-  var staticSegmentValue = 10;
-  var splatPenalty = -2;
-  var isSplat = (s) => s === "*";
-  function computeScore(path, index) {
-    let segments = path.split("/");
-    let initialScore = segments.length;
-    if (segments.some(isSplat)) {
-      initialScore += splatPenalty;
-    }
-    if (index) {
-      initialScore += indexRouteValue;
-    }
-    return segments.filter((s) => !isSplat(s)).reduce((score, segment) => score + (paramRe.test(segment) ? dynamicSegmentValue : segment === "" ? emptySegmentValue : staticSegmentValue), initialScore);
-  }
-  function compareIndexes(a, b) {
-    let siblings = a.length === b.length && a.slice(0, -1).every((n, i) => n === b[i]);
-    return siblings ? (
-      // If two routes are siblings, we should try to match the earlier sibling
-      // first. This allows people to have fine-grained control over the matching
-      // behavior by simply putting routes with identical paths in the order they
-      // want them tried.
-      a[a.length - 1] - b[b.length - 1]
-    ) : (
-      // Otherwise, it doesn't really make sense to rank non-siblings by index,
-      // so they sort equally.
-      0
-    );
-  }
-  function matchRouteBranch(branch, pathname, allowPartial) {
-    if (allowPartial === void 0) {
-      allowPartial = false;
-    }
-    let {
-      routesMeta
-    } = branch;
-    let matchedParams = {};
-    let matchedPathname = "/";
-    let matches = [];
-    for (let i = 0; i < routesMeta.length; ++i) {
-      let meta = routesMeta[i];
-      let end = i === routesMeta.length - 1;
-      let remainingPathname = matchedPathname === "/" ? pathname : pathname.slice(matchedPathname.length) || "/";
-      let match = matchPath({
-        path: meta.relativePath,
-        caseSensitive: meta.caseSensitive,
-        end
-      }, remainingPathname);
-      let route = meta.route;
-      if (!match && end && allowPartial && !routesMeta[routesMeta.length - 1].route.index) {
-        match = matchPath({
-          path: meta.relativePath,
-          caseSensitive: meta.caseSensitive,
-          end: false
-        }, remainingPathname);
-      }
-      if (!match) {
-        return null;
-      }
-      Object.assign(matchedParams, match.params);
-      matches.push({
-        // TODO: Can this as be avoided?
-        params: matchedParams,
-        pathname: joinPaths([matchedPathname, match.pathname]),
-        pathnameBase: normalizePathname(joinPaths([matchedPathname, match.pathnameBase])),
-        route
-      });
-      if (match.pathnameBase !== "/") {
-        matchedPathname = joinPaths([matchedPathname, match.pathnameBase]);
-      }
-    }
-    return matches;
   }
   function matchPath(pattern, pathname) {
     if (typeof pattern === "string") {
@@ -24069,14 +23904,6 @@
       ;
     let matcher = new RegExp(regexpSource, caseSensitive ? void 0 : "i");
     return [matcher, params];
-  }
-  function decodePath(value) {
-    try {
-      return value.split("/").map((v) => decodeURIComponent(v).replace(/\//g, "%2F")).join("/");
-    } catch (error) {
-      warning(false, 'The URL path "' + value + '" could not be decoded because it is is a malformed URL segment. This is probably due to a bad percent ' + ("encoding (" + error + ")."));
-      return value;
-    }
   }
   function stripBasename(pathname, basename) {
     if (basename === "/")
@@ -24172,12 +23999,8 @@
     return path;
   }
   var joinPaths = (paths) => paths.join("/").replace(/\/\/+/g, "/");
-  var normalizePathname = (pathname) => pathname.replace(/\/+$/, "").replace(/^\/*/, "/");
   var normalizeSearch = (search) => !search || search === "?" ? "" : search.startsWith("?") ? search : "?" + search;
   var normalizeHash = (hash) => !hash || hash === "#" ? "" : hash.startsWith("#") ? hash : "#" + hash;
-  function isRouteErrorResponse(error) {
-    return error != null && typeof error.status === "number" && typeof error.statusText === "string" && typeof error.internal === "boolean" && "data" in error;
-  }
   var validMutationMethodsArr = ["post", "put", "patch", "delete"];
   var validMutationMethods = new Set(validMutationMethodsArr);
   var validRequestMethodsArr = ["get", ...validMutationMethodsArr];
@@ -24199,27 +24022,27 @@
     };
     return _extends2.apply(this, arguments);
   }
-  var DataRouterContext = /* @__PURE__ */ React.createContext(null);
+  var DataRouterContext = /* @__PURE__ */ React2.createContext(null);
   if (true) {
     DataRouterContext.displayName = "DataRouter";
   }
-  var DataRouterStateContext = /* @__PURE__ */ React.createContext(null);
+  var DataRouterStateContext = /* @__PURE__ */ React2.createContext(null);
   if (true) {
     DataRouterStateContext.displayName = "DataRouterState";
   }
-  var AwaitContext = /* @__PURE__ */ React.createContext(null);
+  var AwaitContext = /* @__PURE__ */ React2.createContext(null);
   if (true) {
     AwaitContext.displayName = "Await";
   }
-  var NavigationContext = /* @__PURE__ */ React.createContext(null);
+  var NavigationContext = /* @__PURE__ */ React2.createContext(null);
   if (true) {
     NavigationContext.displayName = "Navigation";
   }
-  var LocationContext = /* @__PURE__ */ React.createContext(null);
+  var LocationContext = /* @__PURE__ */ React2.createContext(null);
   if (true) {
     LocationContext.displayName = "Location";
   }
-  var RouteContext = /* @__PURE__ */ React.createContext({
+  var RouteContext = /* @__PURE__ */ React2.createContext({
     outlet: null,
     matches: [],
     isDataRoute: false
@@ -24227,7 +24050,7 @@
   if (true) {
     RouteContext.displayName = "Route";
   }
-  var RouteErrorContext = /* @__PURE__ */ React.createContext(null);
+  var RouteErrorContext = /* @__PURE__ */ React2.createContext(null);
   if (true) {
     RouteErrorContext.displayName = "RouteError";
   }
@@ -24244,7 +24067,7 @@
     let {
       basename,
       navigator: navigator2
-    } = React.useContext(NavigationContext);
+    } = React2.useContext(NavigationContext);
     let {
       hash,
       pathname,
@@ -24263,7 +24086,7 @@
     });
   }
   function useInRouterContext() {
-    return React.useContext(LocationContext) != null;
+    return React2.useContext(LocationContext) != null;
   }
   function useLocation() {
     !useInRouterContext() ? true ? invariant(
@@ -24272,19 +24095,19 @@
       // router loaded. We can help them understand how to avoid that.
       "useLocation() may be used only in the context of a <Router> component."
     ) : invariant(false) : void 0;
-    return React.useContext(LocationContext).location;
+    return React2.useContext(LocationContext).location;
   }
   var navigateEffectWarning = "You should call navigate() in a React.useEffect(), not when your component is first rendered.";
   function useIsomorphicLayoutEffect(cb) {
-    let isStatic = React.useContext(NavigationContext).static;
+    let isStatic = React2.useContext(NavigationContext).static;
     if (!isStatic) {
-      React.useLayoutEffect(cb);
+      React2.useLayoutEffect(cb);
     }
   }
   function useNavigate() {
     let {
       isDataRoute
-    } = React.useContext(RouteContext);
+    } = React2.useContext(RouteContext);
     return isDataRoute ? useNavigateStable() : useNavigateUnstable();
   }
   function useNavigateUnstable() {
@@ -24294,24 +24117,24 @@
       // router loaded. We can help them understand how to avoid that.
       "useNavigate() may be used only in the context of a <Router> component."
     ) : invariant(false) : void 0;
-    let dataRouterContext = React.useContext(DataRouterContext);
+    let dataRouterContext = React2.useContext(DataRouterContext);
     let {
       basename,
       future,
       navigator: navigator2
-    } = React.useContext(NavigationContext);
+    } = React2.useContext(NavigationContext);
     let {
       matches
-    } = React.useContext(RouteContext);
+    } = React2.useContext(RouteContext);
     let {
       pathname: locationPathname
     } = useLocation();
     let routePathnamesJson = JSON.stringify(getResolveToMatches(matches, future.v7_relativeSplatPath));
-    let activeRef = React.useRef(false);
+    let activeRef = React2.useRef(false);
     useIsomorphicLayoutEffect(() => {
       activeRef.current = true;
     });
-    let navigate = React.useCallback(function(to, options) {
+    let navigate = React2.useCallback(function(to, options) {
       if (options === void 0) {
         options = {};
       }
@@ -24336,294 +24159,15 @@
     } = _temp2 === void 0 ? {} : _temp2;
     let {
       future
-    } = React.useContext(NavigationContext);
+    } = React2.useContext(NavigationContext);
     let {
       matches
-    } = React.useContext(RouteContext);
+    } = React2.useContext(RouteContext);
     let {
       pathname: locationPathname
     } = useLocation();
     let routePathnamesJson = JSON.stringify(getResolveToMatches(matches, future.v7_relativeSplatPath));
-    return React.useMemo(() => resolveTo(to, JSON.parse(routePathnamesJson), locationPathname, relative === "path"), [to, routePathnamesJson, locationPathname, relative]);
-  }
-  function useRoutes(routes, locationArg) {
-    return useRoutesImpl(routes, locationArg);
-  }
-  function useRoutesImpl(routes, locationArg, dataRouterState, future) {
-    !useInRouterContext() ? true ? invariant(
-      false,
-      // TODO: This error is probably because they somehow have 2 versions of the
-      // router loaded. We can help them understand how to avoid that.
-      "useRoutes() may be used only in the context of a <Router> component."
-    ) : invariant(false) : void 0;
-    let {
-      navigator: navigator2
-    } = React.useContext(NavigationContext);
-    let {
-      matches: parentMatches
-    } = React.useContext(RouteContext);
-    let routeMatch = parentMatches[parentMatches.length - 1];
-    let parentParams = routeMatch ? routeMatch.params : {};
-    let parentPathname = routeMatch ? routeMatch.pathname : "/";
-    let parentPathnameBase = routeMatch ? routeMatch.pathnameBase : "/";
-    let parentRoute = routeMatch && routeMatch.route;
-    if (true) {
-      let parentPath = parentRoute && parentRoute.path || "";
-      warningOnce(parentPathname, !parentRoute || parentPath.endsWith("*"), "You rendered descendant <Routes> (or called `useRoutes()`) at " + ('"' + parentPathname + '" (under <Route path="' + parentPath + '">) but the ') + `parent route path has no trailing "*". This means if you navigate deeper, the parent won't match anymore and therefore the child routes will never render.
-
-` + ('Please change the parent <Route path="' + parentPath + '"> to <Route ') + ('path="' + (parentPath === "/" ? "*" : parentPath + "/*") + '">.'));
-    }
-    let locationFromContext = useLocation();
-    let location;
-    if (locationArg) {
-      var _parsedLocationArg$pa;
-      let parsedLocationArg = typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
-      !(parentPathnameBase === "/" || ((_parsedLocationArg$pa = parsedLocationArg.pathname) == null ? void 0 : _parsedLocationArg$pa.startsWith(parentPathnameBase))) ? true ? invariant(false, "When overriding the location using `<Routes location>` or `useRoutes(routes, location)`, the location pathname must begin with the portion of the URL pathname that was " + ('matched by all parent routes. The current pathname base is "' + parentPathnameBase + '" ') + ('but pathname "' + parsedLocationArg.pathname + '" was given in the `location` prop.')) : invariant(false) : void 0;
-      location = parsedLocationArg;
-    } else {
-      location = locationFromContext;
-    }
-    let pathname = location.pathname || "/";
-    let remainingPathname = pathname;
-    if (parentPathnameBase !== "/") {
-      let parentSegments = parentPathnameBase.replace(/^\//, "").split("/");
-      let segments = pathname.replace(/^\//, "").split("/");
-      remainingPathname = "/" + segments.slice(parentSegments.length).join("/");
-    }
-    let matches = matchRoutes(routes, {
-      pathname: remainingPathname
-    });
-    if (true) {
-      true ? warning(parentRoute || matches != null, 'No routes matched location "' + location.pathname + location.search + location.hash + '" ') : void 0;
-      true ? warning(matches == null || matches[matches.length - 1].route.element !== void 0 || matches[matches.length - 1].route.Component !== void 0 || matches[matches.length - 1].route.lazy !== void 0, 'Matched leaf route at location "' + location.pathname + location.search + location.hash + '" does not have an element or Component. This means it will render an <Outlet /> with a null value by default resulting in an "empty" page.') : void 0;
-    }
-    let renderedMatches = _renderMatches(matches && matches.map((match) => Object.assign({}, match, {
-      params: Object.assign({}, parentParams, match.params),
-      pathname: joinPaths([
-        parentPathnameBase,
-        // Re-encode pathnames that were decoded inside matchRoutes
-        navigator2.encodeLocation ? navigator2.encodeLocation(match.pathname).pathname : match.pathname
-      ]),
-      pathnameBase: match.pathnameBase === "/" ? parentPathnameBase : joinPaths([
-        parentPathnameBase,
-        // Re-encode pathnames that were decoded inside matchRoutes
-        navigator2.encodeLocation ? navigator2.encodeLocation(match.pathnameBase).pathname : match.pathnameBase
-      ])
-    })), parentMatches, dataRouterState, future);
-    if (locationArg && renderedMatches) {
-      return /* @__PURE__ */ React.createElement(LocationContext.Provider, {
-        value: {
-          location: _extends2({
-            pathname: "/",
-            search: "",
-            hash: "",
-            state: null,
-            key: "default"
-          }, location),
-          navigationType: Action.Pop
-        }
-      }, renderedMatches);
-    }
-    return renderedMatches;
-  }
-  function DefaultErrorComponent() {
-    let error = useRouteError();
-    let message = isRouteErrorResponse(error) ? error.status + " " + error.statusText : error instanceof Error ? error.message : JSON.stringify(error);
-    let stack = error instanceof Error ? error.stack : null;
-    let lightgrey = "rgba(200,200,200, 0.5)";
-    let preStyles = {
-      padding: "0.5rem",
-      backgroundColor: lightgrey
-    };
-    let codeStyles = {
-      padding: "2px 4px",
-      backgroundColor: lightgrey
-    };
-    let devInfo = null;
-    if (true) {
-      console.error("Error handled by React Router default ErrorBoundary:", error);
-      devInfo = /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("p", null, "\u{1F4BF} Hey developer \u{1F44B}"), /* @__PURE__ */ React.createElement("p", null, "You can provide a way better UX than this when your app throws errors by providing your own ", /* @__PURE__ */ React.createElement("code", {
-        style: codeStyles
-      }, "ErrorBoundary"), " or", " ", /* @__PURE__ */ React.createElement("code", {
-        style: codeStyles
-      }, "errorElement"), " prop on your route."));
-    }
-    return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("h2", null, "Unexpected Application Error!"), /* @__PURE__ */ React.createElement("h3", {
-      style: {
-        fontStyle: "italic"
-      }
-    }, message), stack ? /* @__PURE__ */ React.createElement("pre", {
-      style: preStyles
-    }, stack) : null, devInfo);
-  }
-  var defaultErrorElement = /* @__PURE__ */ React.createElement(DefaultErrorComponent, null);
-  var RenderErrorBoundary = class extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        location: props.location,
-        revalidation: props.revalidation,
-        error: props.error
-      };
-    }
-    static getDerivedStateFromError(error) {
-      return {
-        error
-      };
-    }
-    static getDerivedStateFromProps(props, state) {
-      if (state.location !== props.location || state.revalidation !== "idle" && props.revalidation === "idle") {
-        return {
-          error: props.error,
-          location: props.location,
-          revalidation: props.revalidation
-        };
-      }
-      return {
-        error: props.error !== void 0 ? props.error : state.error,
-        location: state.location,
-        revalidation: props.revalidation || state.revalidation
-      };
-    }
-    componentDidCatch(error, errorInfo) {
-      console.error("React Router caught the following error during render", error, errorInfo);
-    }
-    render() {
-      return this.state.error !== void 0 ? /* @__PURE__ */ React.createElement(RouteContext.Provider, {
-        value: this.props.routeContext
-      }, /* @__PURE__ */ React.createElement(RouteErrorContext.Provider, {
-        value: this.state.error,
-        children: this.props.component
-      })) : this.props.children;
-    }
-  };
-  function RenderedRoute(_ref) {
-    let {
-      routeContext,
-      match,
-      children
-    } = _ref;
-    let dataRouterContext = React.useContext(DataRouterContext);
-    if (dataRouterContext && dataRouterContext.static && dataRouterContext.staticContext && (match.route.errorElement || match.route.ErrorBoundary)) {
-      dataRouterContext.staticContext._deepestRenderedBoundaryId = match.route.id;
-    }
-    return /* @__PURE__ */ React.createElement(RouteContext.Provider, {
-      value: routeContext
-    }, children);
-  }
-  function _renderMatches(matches, parentMatches, dataRouterState, future) {
-    var _dataRouterState;
-    if (parentMatches === void 0) {
-      parentMatches = [];
-    }
-    if (dataRouterState === void 0) {
-      dataRouterState = null;
-    }
-    if (future === void 0) {
-      future = null;
-    }
-    if (matches == null) {
-      var _future;
-      if (!dataRouterState) {
-        return null;
-      }
-      if (dataRouterState.errors) {
-        matches = dataRouterState.matches;
-      } else if ((_future = future) != null && _future.v7_partialHydration && parentMatches.length === 0 && !dataRouterState.initialized && dataRouterState.matches.length > 0) {
-        matches = dataRouterState.matches;
-      } else {
-        return null;
-      }
-    }
-    let renderedMatches = matches;
-    let errors = (_dataRouterState = dataRouterState) == null ? void 0 : _dataRouterState.errors;
-    if (errors != null) {
-      let errorIndex = renderedMatches.findIndex((m) => m.route.id && (errors == null ? void 0 : errors[m.route.id]) !== void 0);
-      !(errorIndex >= 0) ? true ? invariant(false, "Could not find a matching route for errors on route IDs: " + Object.keys(errors).join(",")) : invariant(false) : void 0;
-      renderedMatches = renderedMatches.slice(0, Math.min(renderedMatches.length, errorIndex + 1));
-    }
-    let renderFallback = false;
-    let fallbackIndex = -1;
-    if (dataRouterState && future && future.v7_partialHydration) {
-      for (let i = 0; i < renderedMatches.length; i++) {
-        let match = renderedMatches[i];
-        if (match.route.HydrateFallback || match.route.hydrateFallbackElement) {
-          fallbackIndex = i;
-        }
-        if (match.route.id) {
-          let {
-            loaderData,
-            errors: errors2
-          } = dataRouterState;
-          let needsToRunLoader = match.route.loader && loaderData[match.route.id] === void 0 && (!errors2 || errors2[match.route.id] === void 0);
-          if (match.route.lazy || needsToRunLoader) {
-            renderFallback = true;
-            if (fallbackIndex >= 0) {
-              renderedMatches = renderedMatches.slice(0, fallbackIndex + 1);
-            } else {
-              renderedMatches = [renderedMatches[0]];
-            }
-            break;
-          }
-        }
-      }
-    }
-    return renderedMatches.reduceRight((outlet, match, index) => {
-      let error;
-      let shouldRenderHydrateFallback = false;
-      let errorElement = null;
-      let hydrateFallbackElement = null;
-      if (dataRouterState) {
-        error = errors && match.route.id ? errors[match.route.id] : void 0;
-        errorElement = match.route.errorElement || defaultErrorElement;
-        if (renderFallback) {
-          if (fallbackIndex < 0 && index === 0) {
-            warningOnce("route-fallback", false, "No `HydrateFallback` element provided to render during initial hydration");
-            shouldRenderHydrateFallback = true;
-            hydrateFallbackElement = null;
-          } else if (fallbackIndex === index) {
-            shouldRenderHydrateFallback = true;
-            hydrateFallbackElement = match.route.hydrateFallbackElement || null;
-          }
-        }
-      }
-      let matches2 = parentMatches.concat(renderedMatches.slice(0, index + 1));
-      let getChildren = () => {
-        let children;
-        if (error) {
-          children = errorElement;
-        } else if (shouldRenderHydrateFallback) {
-          children = hydrateFallbackElement;
-        } else if (match.route.Component) {
-          children = /* @__PURE__ */ React.createElement(match.route.Component, null);
-        } else if (match.route.element) {
-          children = match.route.element;
-        } else {
-          children = outlet;
-        }
-        return /* @__PURE__ */ React.createElement(RenderedRoute, {
-          match,
-          routeContext: {
-            outlet,
-            matches: matches2,
-            isDataRoute: dataRouterState != null
-          },
-          children
-        });
-      };
-      return dataRouterState && (match.route.ErrorBoundary || match.route.errorElement || index === 0) ? /* @__PURE__ */ React.createElement(RenderErrorBoundary, {
-        location: dataRouterState.location,
-        revalidation: dataRouterState.revalidation,
-        component: errorElement,
-        error,
-        children: getChildren(),
-        routeContext: {
-          outlet: null,
-          matches: matches2,
-          isDataRoute: true
-        }
-      }) : getChildren();
-    }, null);
+    return React2.useMemo(() => resolveTo(to, JSON.parse(routePathnamesJson), locationPathname, relative === "path"), [to, routePathnamesJson, locationPathname, relative]);
   }
   var DataRouterHook = /* @__PURE__ */ function(DataRouterHook3) {
     DataRouterHook3["UseBlocker"] = "useBlocker";
@@ -24648,17 +24192,17 @@
     return hookName + " must be used within a data router.  See https://reactrouter.com/v6/routers/picking-a-router.";
   }
   function useDataRouterContext(hookName) {
-    let ctx = React.useContext(DataRouterContext);
+    let ctx = React2.useContext(DataRouterContext);
     !ctx ? true ? invariant(false, getDataRouterConsoleError(hookName)) : invariant(false) : void 0;
     return ctx;
   }
   function useDataRouterState(hookName) {
-    let state = React.useContext(DataRouterStateContext);
+    let state = React2.useContext(DataRouterStateContext);
     !state ? true ? invariant(false, getDataRouterConsoleError(hookName)) : invariant(false) : void 0;
     return state;
   }
   function useRouteContext(hookName) {
-    let route = React.useContext(RouteContext);
+    let route = React2.useContext(RouteContext);
     !route ? true ? invariant(false, getDataRouterConsoleError(hookName)) : invariant(false) : void 0;
     return route;
   }
@@ -24680,28 +24224,18 @@
       matches,
       loaderData
     } = useDataRouterState(DataRouterStateHook.UseMatches);
-    return React.useMemo(() => matches.map((m) => convertRouteMatchToUiMatch(m, loaderData)), [matches, loaderData]);
-  }
-  function useRouteError() {
-    var _state$errors;
-    let error = React.useContext(RouteErrorContext);
-    let state = useDataRouterState(DataRouterStateHook.UseRouteError);
-    let routeId = useCurrentRouteId(DataRouterStateHook.UseRouteError);
-    if (error !== void 0) {
-      return error;
-    }
-    return (_state$errors = state.errors) == null ? void 0 : _state$errors[routeId];
+    return React2.useMemo(() => matches.map((m) => convertRouteMatchToUiMatch(m, loaderData)), [matches, loaderData]);
   }
   function useNavigateStable() {
     let {
       router
     } = useDataRouterContext(DataRouterHook.UseNavigateStable);
     let id = useCurrentRouteId(DataRouterStateHook.UseNavigateStable);
-    let activeRef = React.useRef(false);
+    let activeRef = React2.useRef(false);
     useIsomorphicLayoutEffect(() => {
       activeRef.current = true;
     });
-    let navigate = React.useCallback(function(to, options) {
+    let navigate = React2.useCallback(function(to, options) {
       if (options === void 0) {
         options = {};
       }
@@ -24717,13 +24251,6 @@
       }
     }, [router, id]);
     return navigate;
-  }
-  var alreadyWarned$1 = {};
-  function warningOnce(key, cond, message) {
-    if (!cond && !alreadyWarned$1[key]) {
-      alreadyWarned$1[key] = true;
-      true ? warning(false, message) : void 0;
-    }
   }
   var alreadyWarned = {};
   function warnOnce(key, message) {
@@ -24756,10 +24283,7 @@
     }
   }
   var START_TRANSITION = "startTransition";
-  var startTransitionImpl = React[START_TRANSITION];
-  function Route(_props) {
-    true ? invariant(false, "A <Route> is only ever to be used as the child of <Routes> element, never rendered directly. Please wrap your <Route> in a <Routes>.") : invariant(false);
-  }
+  var startTransitionImpl = React2[START_TRANSITION];
   function Router(_ref5) {
     let {
       basename: basenameProp = "/",
@@ -24772,7 +24296,7 @@
     } = _ref5;
     !!useInRouterContext() ? true ? invariant(false, "You cannot render a <Router> inside another <Router>. You should never have more than one in your app.") : invariant(false) : void 0;
     let basename = basenameProp.replace(/^\/*/, "/");
-    let navigationContext = React.useMemo(() => ({
+    let navigationContext = React2.useMemo(() => ({
       basename,
       navigator: navigator2,
       static: staticProp,
@@ -24790,7 +24314,7 @@
       state = null,
       key = "default"
     } = locationProp;
-    let locationContext = React.useMemo(() => {
+    let locationContext = React2.useMemo(() => {
       let trailingPathname = stripBasename(pathname, basename);
       if (trailingPathname == null) {
         return null;
@@ -24810,61 +24334,15 @@
     if (locationContext == null) {
       return null;
     }
-    return /* @__PURE__ */ React.createElement(NavigationContext.Provider, {
+    return /* @__PURE__ */ React2.createElement(NavigationContext.Provider, {
       value: navigationContext
-    }, /* @__PURE__ */ React.createElement(LocationContext.Provider, {
+    }, /* @__PURE__ */ React2.createElement(LocationContext.Provider, {
       children,
       value: locationContext
     }));
   }
-  function Routes(_ref6) {
-    let {
-      children,
-      location
-    } = _ref6;
-    return useRoutes(createRoutesFromChildren(children), location);
-  }
   var neverSettledPromise = new Promise(() => {
   });
-  function createRoutesFromChildren(children, parentPath) {
-    if (parentPath === void 0) {
-      parentPath = [];
-    }
-    let routes = [];
-    React.Children.forEach(children, (element, index) => {
-      if (!/* @__PURE__ */ React.isValidElement(element)) {
-        return;
-      }
-      let treePath = [...parentPath, index];
-      if (element.type === React.Fragment) {
-        routes.push.apply(routes, createRoutesFromChildren(element.props.children, treePath));
-        return;
-      }
-      !(element.type === Route) ? true ? invariant(false, "[" + (typeof element.type === "string" ? element.type : element.type.name) + "] is not a <Route> component. All component children of <Routes> must be a <Route> or <React.Fragment>") : invariant(false) : void 0;
-      !(!element.props.index || !element.props.children) ? true ? invariant(false, "An index route cannot have child routes.") : invariant(false) : void 0;
-      let route = {
-        id: element.props.id || treePath.join("-"),
-        caseSensitive: element.props.caseSensitive,
-        element: element.props.element,
-        Component: element.props.Component,
-        index: element.props.index,
-        path: element.props.path,
-        loader: element.props.loader,
-        action: element.props.action,
-        errorElement: element.props.errorElement,
-        ErrorBoundary: element.props.ErrorBoundary,
-        hasErrorBoundary: element.props.ErrorBoundary != null || element.props.errorElement != null,
-        shouldRevalidate: element.props.shouldRevalidate,
-        handle: element.props.handle,
-        lazy: element.props.lazy
-      };
-      if (element.props.children) {
-        route.children = createRoutesFromChildren(element.props.children, treePath);
-      }
-      routes.push(route);
-    });
-    return routes;
-  }
 
   // node_modules/react-router-dom/dist/index.js
   function _extends3() {
@@ -25005,22 +24483,22 @@
     window.__reactRouterVersion = REACT_ROUTER_VERSION;
   } catch (e) {
   }
-  var ViewTransitionContext = /* @__PURE__ */ React2.createContext({
+  var ViewTransitionContext = /* @__PURE__ */ React3.createContext({
     isTransitioning: false
   });
   if (true) {
     ViewTransitionContext.displayName = "ViewTransition";
   }
-  var FetchersContext = /* @__PURE__ */ React2.createContext(/* @__PURE__ */ new Map());
+  var FetchersContext = /* @__PURE__ */ React3.createContext(/* @__PURE__ */ new Map());
   if (true) {
     FetchersContext.displayName = "Fetchers";
   }
   var START_TRANSITION2 = "startTransition";
-  var startTransitionImpl2 = React2[START_TRANSITION2];
+  var startTransitionImpl2 = React3[START_TRANSITION2];
   var FLUSH_SYNC = "flushSync";
   var flushSyncImpl = ReactDOM[FLUSH_SYNC];
   var USE_ID = "useId";
-  var useIdImpl = React2[USE_ID];
+  var useIdImpl = React3[USE_ID];
   function BrowserRouter(_ref4) {
     let {
       basename,
@@ -25028,7 +24506,7 @@
       future,
       window: window2
     } = _ref4;
-    let historyRef = React2.useRef();
+    let historyRef = React3.useRef();
     if (historyRef.current == null) {
       historyRef.current = createBrowserHistory({
         window: window2,
@@ -25036,19 +24514,19 @@
       });
     }
     let history = historyRef.current;
-    let [state, setStateImpl] = React2.useState({
+    let [state, setStateImpl] = React3.useState({
       action: history.action,
       location: history.location
     });
     let {
       v7_startTransition
     } = future || {};
-    let setState = React2.useCallback((newState) => {
+    let setState = React3.useCallback((newState) => {
       v7_startTransition && startTransitionImpl2 ? startTransitionImpl2(() => setStateImpl(newState)) : setStateImpl(newState);
     }, [setStateImpl, v7_startTransition]);
-    React2.useLayoutEffect(() => history.listen(setState), [history, setState]);
-    React2.useEffect(() => logV6DeprecationWarnings(future), [future]);
-    return /* @__PURE__ */ React2.createElement(Router, {
+    React3.useLayoutEffect(() => history.listen(setState), [history, setState]);
+    React3.useEffect(() => logV6DeprecationWarnings(future), [future]);
+    return /* @__PURE__ */ React3.createElement(Router, {
       basename,
       children,
       location: state.location,
@@ -25064,19 +24542,19 @@
       future,
       history
     } = _ref6;
-    let [state, setStateImpl] = React2.useState({
+    let [state, setStateImpl] = React3.useState({
       action: history.action,
       location: history.location
     });
     let {
       v7_startTransition
     } = future || {};
-    let setState = React2.useCallback((newState) => {
+    let setState = React3.useCallback((newState) => {
       v7_startTransition && startTransitionImpl2 ? startTransitionImpl2(() => setStateImpl(newState)) : setStateImpl(newState);
     }, [setStateImpl, v7_startTransition]);
-    React2.useLayoutEffect(() => history.listen(setState), [history, setState]);
-    React2.useEffect(() => logV6DeprecationWarnings(future), [future]);
-    return /* @__PURE__ */ React2.createElement(Router, {
+    React3.useLayoutEffect(() => history.listen(setState), [history, setState]);
+    React3.useEffect(() => logV6DeprecationWarnings(future), [future]);
+    return /* @__PURE__ */ React3.createElement(Router, {
       basename,
       children,
       location: state.location,
@@ -25090,7 +24568,7 @@
   }
   var isBrowser = typeof window !== "undefined" && typeof window.document !== "undefined" && typeof window.document.createElement !== "undefined";
   var ABSOLUTE_URL_REGEX = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
-  var Link = /* @__PURE__ */ React2.forwardRef(function LinkWithRef(_ref7, ref) {
+  var Link = /* @__PURE__ */ React3.forwardRef(function LinkWithRef(_ref7, ref) {
     let {
       onClick,
       relative,
@@ -25104,7 +24582,7 @@
     } = _ref7, rest = _objectWithoutPropertiesLoose(_ref7, _excluded);
     let {
       basename
-    } = React2.useContext(NavigationContext);
+    } = React3.useContext(NavigationContext);
     let absoluteHref;
     let isExternal = false;
     if (typeof to === "string" && ABSOLUTE_URL_REGEX.test(to)) {
@@ -25144,7 +24622,7 @@
     }
     return (
       // eslint-disable-next-line jsx-a11y/anchor-has-content
-      /* @__PURE__ */ React2.createElement("a", _extends3({}, rest, {
+      /* @__PURE__ */ React3.createElement("a", _extends3({}, rest, {
         href: absoluteHref || href,
         onClick: isExternal || reloadDocument ? onClick : handleClick,
         ref,
@@ -25155,7 +24633,7 @@
   if (true) {
     Link.displayName = "Link";
   }
-  var NavLink = /* @__PURE__ */ React2.forwardRef(function NavLinkWithRef(_ref8, ref) {
+  var NavLink = /* @__PURE__ */ React3.forwardRef(function NavLinkWithRef(_ref8, ref) {
     let {
       "aria-current": ariaCurrentProp = "page",
       caseSensitive = false,
@@ -25170,11 +24648,11 @@
       relative: rest.relative
     });
     let location = useLocation();
-    let routerState = React2.useContext(DataRouterStateContext);
+    let routerState = React3.useContext(DataRouterStateContext);
     let {
       navigator: navigator2,
       basename
-    } = React2.useContext(NavigationContext);
+    } = React3.useContext(NavigationContext);
     let isTransitioning = routerState != null && // Conditional usage is OK here because the usage of a data router is static
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useViewTransitionState(path) && viewTransition === true;
@@ -25205,7 +24683,7 @@
       className = [classNameProp, isActive ? "active" : null, isPending ? "pending" : null, isTransitioning ? "transitioning" : null].filter(Boolean).join(" ");
     }
     let style = typeof styleProp === "function" ? styleProp(renderProps) : styleProp;
-    return /* @__PURE__ */ React2.createElement(Link, _extends3({}, rest, {
+    return /* @__PURE__ */ React3.createElement(Link, _extends3({}, rest, {
       "aria-current": ariaCurrent,
       className,
       ref,
@@ -25217,7 +24695,7 @@
   if (true) {
     NavLink.displayName = "NavLink";
   }
-  var Form = /* @__PURE__ */ React2.forwardRef((_ref9, forwardedRef) => {
+  var Form = /* @__PURE__ */ React3.forwardRef((_ref9, forwardedRef) => {
     let {
       fetcherKey,
       navigate,
@@ -25254,7 +24732,7 @@
         viewTransition
       });
     };
-    return /* @__PURE__ */ React2.createElement("form", _extends3({
+    return /* @__PURE__ */ React3.createElement("form", _extends3({
       ref: forwardedRef,
       method: formMethod,
       action: formAction,
@@ -25296,12 +24774,12 @@
     return hookName + " must be used within a data router.  See https://reactrouter.com/v6/routers/picking-a-router.";
   }
   function useDataRouterContext2(hookName) {
-    let ctx = React2.useContext(DataRouterContext);
+    let ctx = React3.useContext(DataRouterContext);
     !ctx ? true ? invariant(false, getDataRouterConsoleError2(hookName)) : invariant(false) : void 0;
     return ctx;
   }
   function useDataRouterState2(hookName) {
-    let state = React2.useContext(DataRouterStateContext);
+    let state = React3.useContext(DataRouterStateContext);
     !state ? true ? invariant(false, getDataRouterConsoleError2(hookName)) : invariant(false) : void 0;
     return state;
   }
@@ -25319,7 +24797,7 @@
     let path = useResolvedPath(to, {
       relative
     });
-    return React2.useCallback((event) => {
+    return React3.useCallback((event) => {
       if (shouldProcessLinkClick(event, target)) {
         event.preventDefault();
         let replace2 = replaceProp !== void 0 ? replaceProp : createPath(location) === createPath(path);
@@ -25346,9 +24824,9 @@
     } = useDataRouterContext2(DataRouterHook2.UseSubmit);
     let {
       basename
-    } = React2.useContext(NavigationContext);
+    } = React3.useContext(NavigationContext);
     let currentRouteId = useRouteId();
-    return React2.useCallback(function(target, options) {
+    return React3.useCallback(function(target, options) {
       if (options === void 0) {
         options = {};
       }
@@ -25392,8 +24870,8 @@
     } = _temp2 === void 0 ? {} : _temp2;
     let {
       basename
-    } = React2.useContext(NavigationContext);
-    let routeContext = React2.useContext(RouteContext);
+    } = React3.useContext(NavigationContext);
+    let routeContext = React3.useContext(RouteContext);
     !routeContext ? true ? invariant(false, "useFormAction must be used inside a RouteContext") : invariant(false) : void 0;
     let [match] = routeContext.matches.slice(-1);
     let path = _extends3({}, useResolvedPath(action ? action : ".", {
@@ -25436,17 +24914,17 @@
     } = useDataRouterState2(DataRouterStateHook2.UseScrollRestoration);
     let {
       basename
-    } = React2.useContext(NavigationContext);
+    } = React3.useContext(NavigationContext);
     let location = useLocation();
     let matches = useMatches();
     let navigation = useNavigation();
-    React2.useEffect(() => {
+    React3.useEffect(() => {
       window.history.scrollRestoration = "manual";
       return () => {
         window.history.scrollRestoration = "auto";
       };
     }, []);
-    usePageHide(React2.useCallback(() => {
+    usePageHide(React3.useCallback(() => {
       if (navigation.state === "idle") {
         let key = (getKey ? getKey(location, matches) : null) || location.key;
         savedScrollPositions[key] = window.scrollY;
@@ -25459,7 +24937,7 @@
       window.history.scrollRestoration = "auto";
     }, [storageKey, getKey, navigation.state, location, matches]));
     if (typeof document !== "undefined") {
-      React2.useLayoutEffect(() => {
+      React3.useLayoutEffect(() => {
         try {
           let sessionPositions = sessionStorage.getItem(storageKey || SCROLL_RESTORATION_STORAGE_KEY);
           if (sessionPositions) {
@@ -25468,7 +24946,7 @@
         } catch (e) {
         }
       }, [storageKey]);
-      React2.useLayoutEffect(() => {
+      React3.useLayoutEffect(() => {
         let getKeyWithoutBasename = getKey && basename !== "/" ? (location2, matches2) => getKey(
           // Strip the basename to match useLocation()
           _extends3({}, location2, {
@@ -25479,7 +24957,7 @@
         let disableScrollRestoration = router == null ? void 0 : router.enableScrollRestoration(savedScrollPositions, () => window.scrollY, getKeyWithoutBasename);
         return () => disableScrollRestoration && disableScrollRestoration();
       }, [router, basename, getKey]);
-      React2.useLayoutEffect(() => {
+      React3.useLayoutEffect(() => {
         if (restoreScrollPosition === false) {
           return;
         }
@@ -25505,7 +24983,7 @@
     let {
       capture
     } = options || {};
-    React2.useEffect(() => {
+    React3.useEffect(() => {
       let opts = capture != null ? {
         capture
       } : void 0;
@@ -25519,7 +24997,7 @@
     if (opts === void 0) {
       opts = {};
     }
-    let vtContext = React2.useContext(ViewTransitionContext);
+    let vtContext = React3.useContext(ViewTransitionContext);
     !(vtContext != null) ? true ? invariant(false, "`useViewTransitionState` must be used within `react-router-dom`'s `RouterProvider`.  Did you accidentally import `RouterProvider` from `react-router`?") : invariant(false) : void 0;
     let {
       basename
@@ -25535,75 +25013,11 @@
     return matchPath(path.pathname, nextPath) != null || matchPath(path.pathname, currentPath) != null;
   }
 
-  // src/App.jsx
-  var import_react3 = __toESM(require_react());
-
-  // src/components/DubForm.jsx
-  var import_react = __toESM(require_react());
-  var DubForm = () => {
-    const [audioFile, setAudioFile] = (0, import_react.useState)(null);
-    const navigate = useNavigate();
-    const handleFileChange = (e) => {
-      setAudioFile(e.target.files[0]);
-    };
-    const handleSubmit = async () => {
-      if (!audioFile) {
-        alert("Please select a file first.");
-        return;
-      }
-      const formData = new FormData();
-      formData.append("audio", audioFile);
-      formData.append("lang", "te");
-      try {
-        const res = await fetch("https://your-backend-url.com/dub", {
-          method: "POST",
-          body: formData
-        });
-        const data = await res.json();
-        navigate("/result", { state: { audioUrl: data.output_url } });
-      } catch (err) {
-        console.error("Dubbing failed:", err);
-        alert("Something went wrong.");
-      }
-    };
-    return /* @__PURE__ */ import_react.default.createElement("div", { className: "p-6 max-w-md mx-auto space-y-4" }, /* @__PURE__ */ import_react.default.createElement(
-      "input",
-      {
-        type: "file",
-        accept: "audio/*",
-        onChange: handleFileChange,
-        className: "block w-full"
-      }
-    ), /* @__PURE__ */ import_react.default.createElement(
-      "button",
-      {
-        onClick: handleSubmit,
-        className: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      },
-      "Submit to Dub"
-    ));
-  };
-  var DubForm_default = DubForm;
-
-  // src/pages/DubResult.jsx
-  var import_react2 = __toESM(require_react());
-  var DubResult = () => {
-    const location = useLocation();
-    const audioUrl = location.state?.audioUrl;
-    return /* @__PURE__ */ import_react2.default.createElement("div", { className: "p-6 max-w-xl mx-auto text-center" }, /* @__PURE__ */ import_react2.default.createElement("h1", { className: "text-2xl font-bold mb-4" }, "Dubbed Audio Result"), audioUrl ? /* @__PURE__ */ import_react2.default.createElement("audio", { controls: true, src: audioUrl, className: "w-full" }) : /* @__PURE__ */ import_react2.default.createElement("p", null, "No audio result found."));
-  };
-  var DubResult_default = DubResult;
-
-  // src/App.jsx
-  var App = () => {
-    return /* @__PURE__ */ import_react3.default.createElement(Routes, null, /* @__PURE__ */ import_react3.default.createElement(Route, { path: "/", element: /* @__PURE__ */ import_react3.default.createElement(DubForm_default, null) }), /* @__PURE__ */ import_react3.default.createElement(Route, { path: "/result", element: /* @__PURE__ */ import_react3.default.createElement(DubResult_default, null) }));
-  };
-  var App_default = App;
-
   // src/main.jsx
+  var import_App = __toESM(require_App());
   var root = import_client.default.createRoot(document.getElementById("root"));
   root.render(
-    /* @__PURE__ */ import_react4.default.createElement(BrowserRouter, null, /* @__PURE__ */ import_react4.default.createElement(App_default, null))
+    /* @__PURE__ */ import_react.default.createElement(BrowserRouter, null, /* @__PURE__ */ import_react.default.createElement(import_App.default, null))
   );
 })();
 /*! Bundled license information:
