@@ -1,39 +1,22 @@
 {
   "name": "youdub-ui",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
-  },
+  "version": "1.0.0",
+  "description": "YouDub frontend with esbuild",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "esbuild src/main.jsx --bundle --outfile=dist/bundle.js --loader:.js=jsx --loader:.jsx=jsx --watch",
+    "build": "esbuild src/main.jsx --bundle --outfile=dist/bundle.js --loader:.js=jsx --loader:.jsx=jsx"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "esbuild": "^0.20.0",
+    "postcss": "^8.5.4",
+    "tailwindcss": "^4.1.8"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "dependencies": {
+    "framer-motion": "^11.0.17",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.21.2",
+    "web-vitals": "^3.3.1"
   }
 }
