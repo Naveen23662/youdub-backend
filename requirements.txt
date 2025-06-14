@@ -1,5 +1,7 @@
 Flask
 gunicorn
-yt-dlp
 flask-cors
+transformers
+torch
+sentencepiece
 
