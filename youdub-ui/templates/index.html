@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouDub — Dub YouTube Videos in Any Language</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-[#0f0c29] text-white flex flex-col items-center justify-center min-h-screen px-4">
+    <img src="/logo.png" alt="YouDub Logo" class="w-20 h-20 mb-6" />
+    <h1 class="text-3xl md:text-4xl font-bold mb-4 text-center">
+      YouDub — Dub YouTube Videos in Any Language
+    </h1>
+    <form method="POST" class="w-full max-w-md bg-[#1a1a2e] p-6 rounded-xl shadow-lg space-y-4">
+      <div>
+        <label class="block text-sm mb-1">YouTube URL</label>
+        <input
+          type="text"
+          name="url"
+          placeholder="https://www.youtube.com/watch?v=..."
+          class="w-full p-3 rounded-md bg-[#0f0c29] border border-[#2c2c54] placeholder-gray-400 text-white"
+        />
+      </div>
+      <div>
+        <label class="block text-sm mb-1">Select Language</label>
+        <select name="lang" class="w-full p-3 rounded-md bg-[#0f0c29] border border-[#2c2c54] text-white">
+          <option value="hi">Hindi</option>
+          <option value="te">Telugu</option>
+          <option value="ta">Tamil</option>
+          <option value="bn">Bengali</option>
+          <!-- add more as needed -->
+        </select>
+      </div>
+      <button type="submit" class="w-full py-3 rounded-md bg-indigo-600 hover:bg-indigo-700 transition">
+        Download & Dub
+      </button>
+    </form>
+  </body>
+</html>
+
