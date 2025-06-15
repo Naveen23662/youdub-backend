@@ -1,63 +1,73 @@
-from flask import Flask, request, jsonify
+kfrom flask import Flask, request, send_file
 from flask_cors import CORS
-from transformers import pipeline
+from transformers import MarianMTModel, MarianTokenizer
+import torch
+import asyncio
+import edge_tts
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/')
-def home():
-    return "YouDub backend is live!"
+# Language code map
+lang_model_map = {
+    "hi": "Helsinki-NLP/opus-mt-en-hi",
+    "te": "Helsinki-NLP/opus-mt-en-te",
+    "ta": "Helsinki-NLP/opus-mt-en-ta",
+    "ml": "Helsinki-NLP/opus-mt-en-ml",
+    "kn": "Helsinki-NLP/opus-mt-en-kn",
+    "mr": "Helsinki-NLP/opus-mt-en-mr",
+    "bn": "Helsinki-NLP/opus-mt-en-bn",
+    "gu": "Helsinki-NLP/opus-mt-en-gu",
+    "pa": "Helsinki-NLP/opus-mt-en-pa",
+    "ur": "Helsinki-NLP/opus-mt-en-ur",
+    "fr": "Helsinki-NLP/opus-mt-en-fr",
+    "de": "Helsinki-NLP/opus-mt-en-de",
+    "es": "Helsinki-NLP/opus-mt-en-es",
+    "it": "Helsinki-NLP/opus-mt-en-it",
+    "ru": "Helsinki-NLP/opus-mt-en-ru",
+    "zh": "Helsinki-NLP/opus-mt-en-zh",
+    "ja": "Helsinki-NLP/opus-mt-en-jap",
+    "ko": "Helsinki-NLP/opus-mt-en-ko",
+    "pt": "Helsinki-NLP/opus-mt-en-pt",
+    "ar": "Helsinki-NLP/opus-mt-en-ar",
+    "en": None  # English — no translation needed
+}
 
-@app.route('/dub', methods=['POST'])
+# Translation function
+def translate(text, lang_code):
+    if lang_code == "en":
+        return text
+    model_name = lang_model_map.get(lang_code)
+    if not model_name:
+        return "Unsupported language"
+    tokenizer = MarianTokenizer.from_pretrained(model_name)
+    model = MarianMTModel.from_pretrained(model_name)
+    tokens = tokenizer(text, return_tensors="pt", padding=True)
+    translated = model.generate(**tokens)
+    return tokenizer.decode(translated[0], skip_special_tokens=True)
+
+# TTS function
+async def generate_audio(text, lang_code, filename):
+    voice_map = {
+        "hi": "hi-IN-SwaraNeural", "te": "te-IN-MohanNeural", "ta": "ta-IN-PallaviNeural",
+        "ml": "ml-IN-SobhanaNeural", "kn": "kn-IN-GaganNeural", "mr": "mr-IN-AarohiNeural",
+        "bn": "bn-IN-TanishaaNeural", "gu": "gu-IN-DhwaniNeural", "pa": "pa-IN-IpseetaNeural",
+        "ur": "ur-IN-GulNeural", "en": "en-IN-PrabhatNeural", "fr": "fr-FR-DeniseNeural",
+        "de": "de-DE-KatjaNeural", "es": "es-ES-ElviraNeural", "it": "it-IT-ElsaNeural",
+        "ru": "ru-RU-DariyaNeural", "zh": "zh-CN-XiaoxiaoNeural", "ja": "ja-JP-NanamiNeural",
+        "ko": "ko-KR-SunHiNeural", "pt": "pt-BR-FranciscaNeural", "ar": "ar-EG-SalmaNeural"
+    }
+    voice = voice_map.get(lang_code, "en-IN-PrabhatNeural")
+    communicate = edge_tts.Communicate(text, voice)
+    await communicate.save(filename)
+
+@app.route("/dub", methods=["POST"])
 def dub():
     data = request.json
     text = data.get("text")
-    target_lang = data.get("lang")
-
-    if not text or not target_lang:
-        return jsonify({"error": "Missing text or target language"}), 400
-
-    try:
-        model_map = {
-            "hi": "Helsinki-NLP/opus-mt-en-hi",
-            "te": "Helsinki-NLP/opus-mt-en-te",
-            "ta": "Helsinki-NLP/opus-mt-en-ta",
-            "kn": "Helsinki-NLP/opus-mt-en-kn",
-            "ml": "Helsinki-NLP/opus-mt-en-ml",
-            "mr": "Helsinki-NLP/opus-mt-en-mr",
-            "bn": "Helsinki-NLP/opus-mt-en-bn",
-            "gu": "Helsinki-NLP/opus-mt-en-gu",
-            "pa": "Helsinki-NLP/opus-mt-en-pa",
-            "es": "Helsinki-NLP/opus-mt-en-es",
-            "fr": "Helsinki-NLP/opus-mt-en-fr",
-            "de": "Helsinki-NLP/opus-mt-en-de",
-            "it": "Helsinki-NLP/opus-mt-en-it",
-            "ja": "Helsinki-NLP/opus-mt-en-ja",
-            "ko": "Helsinki-NLP/opus-mt-en-ko",
-            "zh": "Helsinki-NLP/opus-mt-en-zh",
-            "ru": "Helsinki-NLP/opus-mt-en-ru",
-            "pt": "Helsinki-NLP/opus-mt-en-pt",
-            "ar": "Helsinki-NLP/opus-mt-en-ar"
-        }
-
-        model_id = model_map.get(target_lang)
-        if not model_id:
-            return jsonify({"error": f"Language '{target_lang}' not supported"}), 400
-
-        translator = pipeline("translation", model=model_id)
-        result = translator(text, max_length=512)
-
-        return jsonify({
-            "message": "✅ Translation successful",
-            "translated": result[0]['translation_text'],
-            "lang": target_lang
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ✅ Required for Render to work:
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    lang = data.get("lang", "en")
+    translated = translate(text, lang)
+    filename = "dubbed.mp3"
+    asyncio.run(generate_audio(translated, lang, filename))
+    return send_file(filename, mimetype="audio/mpeg")
 
