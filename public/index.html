@@ -1,13 +1,69 @@
-<!-- Page title -->
-<title>YouDub – Translate & Dub YouTube Instantly</title>
+<body style="background-color: #000; color: #fff; text-align: center; padding: 40px;">
+  <h1>YouDub 🎬</h1>
+  <p>Dub any YouTube video into 20 languages</p>
 
-<!-- Favicon -->
-<link rel="icon" type="image/x-icon" href="%PUBLIC_URL%/favicon.ico" />
+  <input id="youtubeUrl" type="text" placeholder="Enter English text here" style="padding: 10px; width: 300px;" /><br/><br/>
 
-<!-- OpenGraph / Preview -->
-<meta property="og:title" content="YouDub" />
-<meta property="og:description" content="Dub any YouTube video into your language with one click." />
-<meta property="og:image" content="%PUBLIC_URL%/logo.png" />
-<meta property="og:url" content="https://youdub.in" />
-<meta name="theme-color" content="#000000" />
+  <select id="languageSelect" style="padding: 10px;">
+    <option value="en">English</option>
+    <option value="hi">Hindi</option>
+    <option value="te">Telugu</option>
+    <option value="ta">Tamil</option>
+    <option value="kn">Kannada</option>
+    <option value="ml">Malayalam</option>
+    <option value="mr">Marathi</option>
+    <option value="bn">Bengali</option>
+    <option value="gu">Gujarati</option>
+    <option value="pa">Punjabi</option>
+    <option value="es">Spanish</option>
+    <option value="fr">French</option>
+    <option value="de">German</option>
+    <option value="it">Italian</option>
+    <option value="ja">Japanese</option>
+    <option value="ko">Korean</option>
+    <option value="zh">Chinese</option>
+    <option value="ru">Russian</option>
+    <option value="pt">Portuguese</option>
+    <option value="ar">Arabic</option>
+  </select><br/><br/>
+
+  <button onclick="sendDubRequest()" style="padding: 10px 20px;">Translate</button>
+
+  <p id="status" style="margin-top: 20px;"></p>
+
+  <script>
+    async function sendDubRequest() {
+      const youtubeUrl = document.getElementById("youtubeUrl").value;
+      const lang = document.getElementById("languageSelect").value;
+      const statusEl = document.getElementById("status");
+
+      if (!youtubeUrl) {
+        statusEl.innerText = "❌ Please enter text to translate.";
+        return;
+      }
+
+      statusEl.innerText = "⏳ Translating...";
+
+      try {
+        const res = await fetch("https://youdub-backend.onrender.com/dub", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            text: youtubeUrl,
+            lang: lang
+          })
+        });
+
+        const data = await res.json();
+        statusEl.innerText = data.translated
+          ? `✅ Translated: ${data.translated}`
+          : `⚠️ Error: ${data.error || "Failed to translate."}`;
+      } catch (err) {
+        statusEl.innerText = "❌ Server error. Please try again.";
+      }
+    }
+  </script>
+</body>
 
