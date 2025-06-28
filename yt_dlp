@@ -1,15 +1,39 @@
+from flask import Flask, request
 import yt_dlp
+import os
+import uuid
 
-def download_audio(youtube_url):
+app = Flask(__name__)
+
+@app.route('/dub')
+def dub():
+    language = request.args.get('language')
+    video_url = request.args.get('video')
+
+    # Generate unique filename
+    audio_file = f"audio_{uuid.uuid4().hex[:8]}.mp3"
+
+    # Download YouTube audio
     ydl_opts = {
         'format': 'bestaudio/best',
-        'outtmpl': 'audio.%(ext)s',
+        'outtmpl': audio_file,
+        'quiet': True,
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '192',
         }],
     }
+
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([youtube_url])
+        try:
+            ydl.download([video_url])
+        except Exception as e:
+            return f"<p>Failed to download: {e}</p>"
+
+    return f"""
+    <h2>YouDub - Dubbing in {language}</h2>
+    <p>Video URL: {video_url}</p>
+    <p>✅ Audio downloaded as: <strong>{audio_file}</strong></p>
+    """
 
